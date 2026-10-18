@@ -48,41 +48,71 @@
 
 ## Label Taxonomy
 
-<!-- Each label: a one-sentence definition and two real examples from your
-     reading. Then your decision rule for the hardest boundary.
+### `question`
 
-     The decision rule is worth a point on its own and it's the thing most
-     people leave out. Every taxonomy has a hardest boundary. Name yours. -->
-
-### `label_one`
-
-**Definition:**
+**Definition:** A post whose main purpose is to get an answer or recommendation from others, even if it includes personal context or a claim as background.
 
 **Example 1:**
->
+> "Cardio before weights...bad? ... I recently read on a 'gym gurus' instagram that doing cardio before lifting weights is bad for you... Is this true?"
+
+The author describes their cardio routine, mentions advice they saw on Instagram, and asks, “Is this true?” 
+
+Why it fits: The main purpose is to get an answer.
 
 **Example 2:**
->
+> “Was I the asshole or was he?”
+A user recounts a gym incident involving equipment and asks whether they were in the wrong. 
+Why it fits: The author explicitly seeks other people's judgment, so question is the best fit.
 
-### `label_two`
+### `progress_update`
 
-**Definition:**
+**Definition:** A post whose main purpose is to report personal fitness results, a change over time, or an ongoing journey, without the poster primarily asking for help or offering reasoning to others.
 
 **Example 1:**
->
+> “9.5 months into my journey: 6'1 27M 335 → 176”
+The author describes their fitness journey, training routine, and progress over nine and a half months. 
+Why it fits: The primary purpose is reporting a personal journey and its results.
 
 **Example 2:**
->
+> “Got into the gym finally as a 5’8 150lb dude”
+The author shares starting to work out, changes in their weight, and excitement about learning new exercises. 
+Why it fits: The main purpose is sharing personal progress and enthusiasm, rather than asking for advice
+
+### `vent`
+
+**Definition:** A post whose main purpose is to express frustration or recount an annoying/disappointing experience, without primarily asking for advice.
+
+**Example 1:**
+> Complaint about gym music
+A user complains about their gym playing excessively loud music. 
+Why it fits: The main purpose is expressing frustration, not seeking a solution.
+
+**Example 2:**
+> Complaint about unsolicited advice
+A user describes someone approaching them during a workout to criticize their lifting technique without being asked. 
+Why it fits: The author recounts an irritating experience to express frustration.
+
+### `advice_analysis`
+
+**Definition:** A post whose main purpose is to explain, evaluate, or recommend something about fitness using reasoning, evidence, or a specific checkable fact.
+
+**Example 1:**
+> “I made a guide to help you stop being lazy and consistently get in the gym”
+The author draws on psychology concepts such as rewards, precommitment, and reducing barriers to explain how people can build consistent exercise habits. 
+Why it fits: The post offers a structured explanation and actionable recommendations.
+
+**Example 2:**
+> Advice about workout progression
+An experienced lifter explains how adjusting training intensity and focusing on heavier weights affected their performance. 
+Why it fits: The comment explains a training approach and its results rather than primarily asking a question.
 
 ### The hardest boundary
 
-**Which two labels:**
+**Which two labels:** `question` vs. `advice_analysis`
 
-**The decision rule I used every time:**
-<!-- e.g. "If the post names a specific checkable fact, it's `analysis`, even
-     if the tone is heated." -->
+**The decision rule I used every time:** If a post ends with or is clearly building toward a direct question ("Is this true?", "should I...", "what do you think"), it's `question` - even if it contains personal backstory, a claim, or something that sounds like it could be analyzed. The question is still the post's actual purpose. `advice_analysis` is reserved for posts where the poster is the one doing the explaining or recommending, not the one asking.
 
-
+**A note on post structure:** I excluded recurring structural/container posts (e.g., weekly megathreads like "Rant Wednesday" that exist to collect other users' replies, rather than express content themselves) during data collection. Individual replies within such threads were still eligible for collection and labeled normally based on their actual content, since those replies are genuine posts with real intent behind them.
 
 ---
 

@@ -53,62 +53,42 @@ whether you hit them:
 
 ## 1.
 
-<!-- Your criterion. It must name a number. -->
+## 1. Overall Accuracy
 
-
-
-**Why this target:**
-
-
-
----
-
-## 2.
-
-<!-- Your criterion. -->
-
-
+The classifier must achieve at least 60% overall accuracy across all three random seeds.
 
 **Why this target:**
 
-
-
+My dataset has 165 examples across four labels, with each label making up about 22–26% of the data. Since random guessing would achieve about 25% accuracy, 60% would be a meaningful improvement while still being a realistic target for a first classifier trained on a relatively small dataset.
 ---
 
-## 3.
+## 2. Per-Label Performance
 
-<!-- Your criterion. -->
+The classifier must achieve an **F1 score of at least 0.40 for each of the four labels across all three random seeds**.
 
-
-
-**Why this target:**
-
-
-
+**Why this target:** My dataset has between 37 and 43 examples per label, so each label has a relatively small number of examples, and only about 6–7 examples per label will appear in each test split. Because F1 scores can fluctuate significantly with so few test examples, I chose a lower threshold than I would for a larger dataset, while still requiring the model to perform better than simply ignoring a category.
 ---
 
-## 4.
+## 3. Confidence
 
-<!-- Your criterion. -->
+The accuracy of the most-confident third of predictions must be **at least 15 percentage points higher** than the accuracy of the least-confident third across all three random seeds.
 
-
-
-**Why this target:**
+**Why this target:** My dataset contains only 165 examples, so the test split is relatively small and individual predictions can noticeably affect accuracy. I chose a 15-percentage-point difference because the model’s confidence should provide a useful signal about which predictions are more reliable, rather than being nearly unrelated to correctness.
 
 
+## 4. Balance
 
----
+Each of the four labels must represent **at least 20% of the dataset after any data preparation or filtering**.
+
+**Why this target:** My dataset contains 165 examples, with 37–43 examples per label, so each label currently represents approximately 22–26% of the data. Setting a 20% minimum allows some flexibility if data needs to be removed while helping prevent any category from becoming underrepresented.
 
 ## 5.
 
-<!-- Your criterion. -->
+## 5. Consistency
 
+The classifier’s labels must achieve **at least 80% agreement with the staff-labeled examples** in the Agreement Report.
 
-
-**Why this target:**
-
-
-
+**Why this target:** My dataset contains four labels that can sometimes overlap, especially when distinguishing `question` from `advice_analysis` or identifying whether a post is a `vent` or a `progress_update`. I chose 80% agreement as a meaningful target for consistent labeling while allowing for some ambiguity in interpreting real Reddit posts.
 ---
 
 <!-- ─────────────────────────────────────────────────────────────────────────
