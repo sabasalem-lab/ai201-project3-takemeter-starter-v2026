@@ -39,10 +39,15 @@
 
 ## What This Does
 
-<!-- Your community, and what your classifier sorts posts into. Three or four
-     sentences. -->
+## What This Does
 
-
+This system is a text classifier that sorts individual posts and comments
+from r/Fitness into one of four categories based on their primary purpose:
+`question` (seeking advice or an answer), `progress_update` (reporting
+personal fitness results or a journey), `vent` (expressing frustration about
+a gym-related experience), or `advice_analysis` (explaining, evaluating, or
+recommending something using reasoning). It was fine-tuned on 165 hand-labeled
+real posts using a small transformer model (DistilBERT).
 
 ---
 
@@ -163,8 +168,6 @@ Why it fits: The comment explains a training approach and its results rather tha
 
 ## The Training Run
 
-## The Training Run
-
 **Base model:** distilbert-base-uncased
 
 **Settings:** 3 epochs, learning rate 2e-5, batch size 16, seed 42
@@ -175,28 +178,34 @@ Why it fits: The comment explains a training approach and its results rather tha
 
 ---
 
+
 ## How I Used AI
-
-<!-- Two specific moments — what you asked, what came back, what you changed.
-
-     ⚠️ Plus disclosure of any pre-labelling. If you had a model pre-label a
-     batch and then read and corrected every one, say that. It's an allowed
-     workflow and disclosing it costs you nothing. Not disclosing it is the
-     problem. -->
 
 **Moment 1**
 
-- *What I asked for:*
-- *What came back:*
-- *What I changed:*
+I asked Claude to suggest labels for a batch of real r/Fitness posts I'd
+collected, based on my 4-label taxonomy and decision rules. It correctly
+labeled most of them, but flagged several posts as too short or ambiguous to
+reliably label (e.g., single-sentence fragments with no real context). I
+reviewed every suggestion myself, corrected a few labels that didn't match my
+own decision rules on close reads, and dropped the flagged fragments entirely
+rather than forcing them into a category.
 
 **Moment 2**
 
-- *What I asked for:*
-- *What came back:*
-- *What I changed:*
+While reviewing one of my labeled rows, Claude pointed out that one post
+("Please don't laugh at the weights I'm talking about...") reported specific
+numeric strength gains over time but I had initially labeled it `vent`
+because of its self-deprecating opening line. I reread it against my own
+`progress_update` definition and relabeled it, since the post's actual content
+was reporting measurable gains, not expressing frustration as its main
+purpose.
 
-**Pre-labelling disclosure:**
+**Pre-labelling disclosure:** I labeled my first 20 posts entirely by hand,
+with no AI involvement (marked `cold` in the note column). For the remaining
+~145 posts, I had Claude suggest labels in batches based on my taxonomy, then
+read and corrected every single suggestion myself before adding it to the
+dataset (marked `ai-assisted`).
 
 <!-- ═══════════════════════ UNIT 6 — THE TEST ═══════════════════════
 
