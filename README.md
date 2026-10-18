@@ -37,7 +37,6 @@
 
 <!-- ═══════════════════════ UNIT 5 — THE BUILD ═══════════════════════ -->
 
-## What This Does
 
 ## What This Does
 
@@ -129,14 +128,13 @@ Why it fits: The comment explains a training approach and its results rather tha
 **How I labelled them:** I developed four labels based on the primary purpose of each post: question, progress_update, vent, and advice_analysis. I used explicit decision rules to resolve ambiguous cases, focusing on what the author was primarily trying to accomplish rather than tone alone.
 
 **Counts per label:**
-
 | Label | Count | Share |
 |---|---|---|
-| question | [8] | [40%] |
-| progress_update | [4] | [20%] |
-| vent | [3] | [15%] |
-| advice_analysis | [5] | [25%] |
-| **Total** | [20] | 100% |
+| vent | 43 | 26% |
+| progress_update | 43 | 26% |
+| question | 42 | 25% |
+| advice_analysis | 37 | 22% |
+| **Total** | 165 | 100% |
 
 **Three hard cases**
 
