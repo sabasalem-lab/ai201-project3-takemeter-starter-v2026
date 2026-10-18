@@ -116,68 +116,62 @@ Why it fits: The comment explains a training approach and its results rather tha
 
 ---
 
+
 ## The Dataset
 
-<!-- Where you collected from, how you labelled, your counts, and three hard
-     cases. -->
+**Where the posts came from:** r/Fitness, a public subreddit with no login wall required to read. I excluded recurring structural/container posts (e.g., weekly "Rant Wednesday" megathreads) since they don't represent individual post intent — only genuine individual posts and genuine individual replies were collected.
 
-**Where the posts came from:**
-
-**How I labelled them:** <!-- Cold first? Pre-labelled with AI and corrected?
-Say so plainly — the disclosure is required, not penalised. -->
+**How I labelled them:** I developed four labels based on the primary purpose of each post: question, progress_update, vent, and advice_analysis. I used explicit decision rules to resolve ambiguous cases, focusing on what the author was primarily trying to accomplish rather than tone alone.
 
 **Counts per label:**
 
 | Label | Count | Share |
 |---|---|---|
-|  |  |  |
-|  |  |  |
-|  |  |  |
-| **Total** |  | 100% |
+| question | [8] | [40%] |
+| progress_update | [4] | [20%] |
+| vent | [3] | [15%] |
+| advice_analysis | [5] | [25%] |
+| **Total** | [20] | 100% |
 
 **Three hard cases**
 
-<!-- Any post that made you pause: what it was, which two labels it could have
-     been, and what you chose. These are worth more than the easy 190. -->
-
 **1.**
-> *The post:*
+> *The post:* "Cardio before weights...bad?" — describes a personal cardio routine, cites a claim from an Instagram "gym guru," and asks whether it's true.
 >
-> *Could have been:*
+> *Could have been:* `question` or `advice_analysis`
 >
-> *I chose, because:*
+> *I chose, because:* The post explicitly ends with "Is this true?" - the question is the post's actual purpose, even though it contains a claim that could be analyzed. My decision rule: if a post is building toward a direct question, it's `question` regardless of what claims or backstory it contains.
 
 **2.**
-> *The post:*
+> *The post:* "Rant Wednesday" weekly megathread invitation.
 >
-> *Could have been:*
->
-> *I chose, because:*
+> Could have been: vent or excluded from the dataset.
+
+> I chose exclusion because: The thread invites other users to share their frustrations; the invitation itself is not an individual's expression of frustration. Its primary function is structural: collecting contributions.
+
+> Decision rule: Exclude recurring container posts. Individual replies within those threads remain eligible and are classified according to their own content and intent.
 
 **3.**
-> *The post:*
->
-> *Could have been:*
->
-> *I chose, because:*
+> The post: “People keep taking the equipment I’m waiting for at the gym. It’s so annoying. Does anyone else deal with this?”
 
+> Could have been: vent or question.
+
+> I chose vent because: The main purpose is to express frustration about a recurring gym experience. The final question asks whether other people can relate, rather than primarily seeking advice or a solution.
+
+> Decision rule: If the main purpose is to express frustration, label it vent, even if the author asks whether others experience the same thing. If the main purpose is to obtain information, advice, or a solution, label it question. The presence of a question mark alone does not determine the label.
 ---
 
 ## The Training Run
 
-<!-- Your starting model, your settings, and anything you changed and why. -->
+## The Training Run
 
-**Base model:**
+**Base model:** distilbert-base-uncased
 
-**Settings:** <!-- epochs, learning rate, batch size, seed -->
+**Settings:** 3 epochs, learning rate 2e-5, batch size 16, seed 42
 
-**Anything I changed from the defaults, and why:**
+**Anything I changed from the defaults, and why:** Nothing — I used the starter's default hyperparameters for this first run.
 
-**Split sizes:** <!-- train / val / test, and per-label counts in the test
-split. If a label had fewer than about 8 in test, say so — it explains a lot
-of next unit's variance. -->
-
-
+**Split sizes:** train 115, val 25, test 25 (70/15/15 stratified split). Per-label counts in the test split: question 6, progress_update 7, vent 6, advice_analysis 6. All four labels have fewer than 8 examples in the test split, which the notebook itself flagged as a reason to expect F1 scores to move significantly between seeds.
 
 ---
 
