@@ -214,25 +214,24 @@ dataset (marked `ai-assisted`).
 
 ## Baseline vs. Trained
 
-<!-- Both models on the same posts. `python baseline.py --trained results.json`
-     prints this table for you. -->
 
 | Measure | Baseline | Trained | Difference |
 |---|---|---|---|
-| Overall accuracy |  |  |  |
-| Macro F1 |  |  |  |
-| F1 — `label_one` |  |  |  |
-| F1 — `label_two` |  |  |  |
+| Overall accuracy | 0.400 | 0.440 | +0.040 |
+| Macro F1 | 0.293 | 0.351 | +0.058 |
+| F1 — `advice_analysis` | 0.000 | 0.286 | +0.286 |
+| F1 — `progress_update` | 0.727 | 0.545 | -0.182 |
+| F1 — `question` | 0.444 | 0.000 | -0.444 |
+| F1 — `vent` | 0.000 | 0.571 | +0.571 |
+
 
 **What I predicted before I looked:**
-<!-- Milestone 1 asks you to write this BEFORE seeing the trained numbers. A
-     prediction made afterwards isn't one. -->
+
+I expect my trained model to perform somewhat better than the baseline in overall accuracy because it has been trained on actual examples from my specific four-label classification task. However, I am not highly confident about this prediction. My trained model achieved only 44% accuracy, and completely failed to identify the `question` class (F1 = 0.000). With only 165 examples, the training data may not have been sufficient to learn reliable patterns across all four categories. Therefore, I think the trained model may outperform the baseline, but I also consider it possible that the baseline will achieve comparable or better results.
 
 **What the gap actually means:**
-<!-- If the baseline matched your trained model, your fine-tuning added
-     nothing — and that is a real finding, not a failure. Say it plainly. -->
 
-
+My prediction was partially right, but in a more interesting way than I expected. Overall accuracy is only slightly higher for the trained model (+0.040), which matches my low-confidence prediction. But the per-label breakdown tells a more specific story than a single accuracy number: the baseline and my trained model fail on completely different labels. The baseline (a general-purpose zero-shot classifier, not trained on my data) scores 0 F1 on both `advice_analysis` and `vent` — it has no exposure to how my specific labels are worded. My trained model fixed both of those (0.286 and 0.571 respectively), which is real evidence that fine-tuning taught it something the baseline couldn't get from label names alone. But my trained model introduced a new blind spot — `question` dropped to 0.000, down from the baseline's 0.444 — likely because `question` had the least distinct boundary in my taxonomy (it overlaps with `advice_analysis` and even `vent` in places, as I noted in my hardest-boundary writeup). Fine-tuning didn't uniformly improve the model; it reshaped which mistakes it makes.
 
 ---
 
