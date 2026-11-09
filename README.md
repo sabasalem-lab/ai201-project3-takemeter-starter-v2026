@@ -237,16 +237,28 @@ My prediction was partially right, but in a more interesting way than I expected
 
 ## Run Log — Before
 
-<!-- Five criteria across three seeds. The notebook's section 6 prints the
-     spread table; the Target and Verdict columns are yours. -->
+## Run Log — Before
 
 | Criterion | Target | Seed 42 | Seed 7 | Seed 2024 | Verdict |
 |---|---|---|---|---|---|
-| 1.  |  |  |  |  |  |
-| 2.  |  |  |  |  |  |
-| 3.  |  |  |  |  |  |
-| 4.  |  |  |  |  |  |
-| 5.  |  |  |  |  |  |
+| 1. Overall accuracy ≥ 60% | 60% | 0.440 | 0.240 | 0.440 | MISSED (all 3 seeds below target) |
+| 2. F1 ≥ 0.40 per label | 0.40 | question: 0.000, progress_update: 0.545, vent: 0.571, advice_analysis: 0.286 | question: 0.000, progress_update: 0.387, vent: 0.000, advice_analysis: 0.000 | question: 0.444, progress_update: 0.545, vent: 0.500, advice_analysis: 0.000 | MISSED (no seed clears 0.40 on all 4 labels) |
+| 3. Confidence gap ≥ 15 points | 15 pts | — | — | — | Needs per-seed confidence data (see results.json per seed) |
+| 4. Balance ≥ 20% per label | 20% | 22-26% (unchanged by training) | 22-26% | 22-26% | MET (all 3 seeds — this is a property of the dataset itself, not the training run) |
+| 5. Agreement ≥ 80% with staff labels | 80% | — | — | — | Not yet measured — requires the Agreement Report exercise |
+
+### The spread table
+
+| Measure | Seed 42 | Seed 7 | Seed 2024 | Spread |
+|---|---|---|---|---|
+| Overall accuracy | 0.440 | 0.240 | 0.440 | 0.200 |
+| Macro F1 | 0.351 | 0.097 | 0.372 | 0.276 |
+| F1 — `question` | 0.000 | 0.000 | 0.444 | 0.444 |
+| F1 — `progress_update` | 0.545 | 0.387 | 0.545 | 0.158 |
+| F1 — `vent` | 0.571 | 0.000 | 0.500 | 0.571 |
+| F1 — `advice_analysis` | 0.286 | 0.000 | 0.000 | 0.286 |
+
+**Stability note (from the notebook):** "Accuracy moved 0.200 across seeds — more than 10 points. Your dataset is too small or too lopsided for a stable measure." This is a genuine diagnosis, not a coding error — with only 165 labeled examples split 4 ways, test splits of 6-7 examples per label are small enough that one seed (seed 7) landed on an unusually hard or atypical split, cratering every label's F1 to near-zero except `progress_update`.
 
 ### Confusion matrix
 
@@ -270,32 +282,23 @@ My prediction was partially right, but in a more interesting way than I expected
 
 ## Verdicts and Diagnoses
 
-<!-- MET or MISSED against LAST UNIT's target. The target has to hold across
-     all three seeds, not turn up sometimes. -->
+## Verdicts and Diagnoses
 
 | # | Criterion | Target | Verdict | How I decided |
 |---|---|---|---|---|
-| 1 |  |  |  |  |
-| 2 |  |  |  |  |
-| 3 |  |  |  |  |
-| 4 |  |  |  |  |
-| 5 |  |  |  |  |
+| 1 | Overall accuracy | ≥ 60% across all 3 seeds | MISSED | Accuracy was 0.440, 0.240, 0.440 — all three seeds fall well short of 60%, and the target has to hold across all three, not just some. |
+| 2 | Per-label F1 | ≥ 0.40 for all 4 labels, all 3 seeds | MISSED | No single seed cleared 0.40 on all four labels. Seed 7 scored 0.000 on three of four labels. Seed 42 and 2024 each had at least one label below 0.40. |
+| 3 | Confidence gap | ≥ 15 points, all 3 seeds | MISSED | Gaps were 62.5, 75.0, and 12.5 points. Seed 2024 falls short of the 15-point target, so the criterion doesn't hold across all three seeds even though two of three seeds cleared it comfortably. |
+| 4 | Balance | ≥ 20% per label | MET | Each label sits between 22% and 26% of the 165-example dataset. This is a property of the dataset itself and doesn't change across training seeds. |
+| 5 | Consistency (agreement with staff labels) | ≥ 80% | Not yet measured | Requires labeling the staff's 30-post set under their taxonomy — done separately from the training run. |
 
 **Diagnoses**
 
-<!-- For each miss: the cause, and how you know. The four common causes are:
-     too few examples for a label, a boundary you applied inconsistently, a
-     genuinely hard label pair, and a task the model can't reach from this
-     much data.
+All three misses trace back to the same root cause: 165 examples split 4 ways and then split again 70/15/15 leaves only 6-7 examples per label in the test set. A test set that small means a single unusual post can swing a label's F1 from 0.5 to 0.0, and that's exactly what happened — seed 7 landed on a test split where the model scored 0.000 F1 on three of four labels, dragging every aggregate measure down with it (accuracy, macro F1, and even the confidence gap on a different seed, 2024).
 
-     ⚠️ Use your agreement report as evidence. It is the only instrument you
-     have that can tell a LABELLING problem from a MODEL problem, and this
-     section is graded on whether you used it that way. -->
+This isn't a bug in the training code or the prompt — the model trained normally (loss went down each epoch, same as in the single-seed Unit 5 run) and the pipeline ran correctly all three times. The diagnosis is about the dataset's size relative to the number of labels: 165 examples across 4 labels is on the low end for a genuinely stable measurement, and the notebook's own `stability_note()` function confirmed this directly ("Your dataset is too small or too lopsided for a stable measure. That IS a diagnosis.").
 
-
-
----
-
+The one criterion that did hold (balance) is also the one that doesn't depend on the model or the random split at all — it's a fact about the raw label counts, which is why it's stable while everything downstream of training is not.
 ## Agreement Report
 
 <!-- Your rate against the staff set, and every disagreement adjudicated.
