@@ -235,7 +235,6 @@ My prediction was partially right, but in a more interesting way than I expected
 
 ---
 
-## Run Log — Before
 
 ## Run Log — Before
 
@@ -243,9 +242,9 @@ My prediction was partially right, but in a more interesting way than I expected
 |---|---|---|---|---|---|
 | 1. Overall accuracy ≥ 60% | 60% | 0.440 | 0.240 | 0.440 | MISSED (all 3 seeds below target) |
 | 2. F1 ≥ 0.40 per label | 0.40 | question: 0.000, progress_update: 0.545, vent: 0.571, advice_analysis: 0.286 | question: 0.000, progress_update: 0.387, vent: 0.000, advice_analysis: 0.000 | question: 0.444, progress_update: 0.545, vent: 0.500, advice_analysis: 0.000 | MISSED (no seed clears 0.40 on all 4 labels) |
-| 3. Confidence gap ≥ 15 points | 15 pts | — | — | — | Needs per-seed confidence data (see results.json per seed) |
+| 3. Confidence gap ≥ 15 points | 62.5 pts | 75.0 pts | 12.5 pts | MISSED |
 | 4. Balance ≥ 20% per label | 20% | 22-26% (unchanged by training) | 22-26% | 22-26% | MET (all 3 seeds — this is a property of the dataset itself, not the training run) |
-| 5. Agreement ≥ 80% with staff labels | 80% | — | — | — | Not yet measured — requires the Agreement Report exercise |
+| 5. Agreement ≥ 80% with staff labels | 100% (30/30) | same | same | MET |  scored under staff’s taxonomy, not my four labels|
 
 ### The spread table
 
@@ -262,25 +261,21 @@ My prediction was partially right, but in a more interesting way than I expected
 
 ### Confusion matrix
 
-<!-- ⚠️ TYPED AS A MARKDOWN TABLE. The notebook prints one ready to paste.
-     An image of a matrix earns nothing. -->
+### Confusion matrix
 
-| true \ predicted |  |  |  |
-|---|---|---|---|
-| **** |  |  |  |
-| **** |  |  |  |
-| **** |  |  |  |
+Seed 42 (25 test posts). Rows are true labels, columns are the model's guesses.
 
-**My biggest off-diagonal number, and what it means:**
-<!-- Not "the model made mistakes" — WHICH boundary it didn't learn, and which
-     direction. "7 real analysis posts were called hot_take and only 3 went the
-     other way" is a direction, not just an error rate. -->
+| true \ predicted | question | progress_update | vent | advice_analysis |
+|---|---|---|---|---|
+| **question** | 0 | 5 | 1 | 0 |
+| **progress_update** | 0 | 6 | 1 | 0 |
+| **vent** | 0 | 2 | 4 | 0 |
+| **advice_analysis** | 1 | 2 | 2 | 1 |
 
-
+**My biggest off-diagonal number, and what it means:** 5 real `question` posts were called `progress_update`, and 0 went the other way. The model did not learn the `question` boundary. It guessed `progress_update` for 15 of the 25 test posts and almost never predicted `question` (once) or `advice_analysis` (once), so it is leaning on `progress_update` as a default. `advice_analysis` was also weak: only 1 of 6 was correct, and the rest were spread across the other three labels.
 
 ---
 
-## Verdicts and Diagnoses
 
 ## Verdicts and Diagnoses
 
@@ -294,88 +289,56 @@ My prediction was partially right, but in a more interesting way than I expected
 
 **Diagnoses**
 
-All three misses trace back to the same root cause: 165 examples split 4 ways and then split again 70/15/15 leaves only 6-7 examples per label in the test set. A test set that small means a single unusual post can swing a label's F1 from 0.5 to 0.0, and that's exactly what happened — seed 7 landed on a test split where the model scored 0.000 F1 on three of four labels, dragging every aggregate measure down with it (accuracy, macro F1, and even the confidence gap on a different seed, 2024).
+All three misses trace back to the same root cause: 165 examples split 4 ways and then split again 70/15/15 leaves only 6-7 examples per label in the test set. A test set that small means a single unusual post can swing a label's F1 from 0.5 to 0.0, and that's exactly what happened — seed 7 landed on a test split where the model scored 0.000 F1 on three of four labels, dragging every aggregate measure down with it (accuracy and macro F1). Seed 2024’s 12.5-point confidence gap is a separate small-sample effect: each seed has its own split, so seed 7’s split can’t have caused it.
 
 This isn't a bug in the training code or the prompt — the model trained normally (loss went down each epoch, same as in the single-seed Unit 5 run) and the pipeline ran correctly all three times. The diagnosis is about the dataset's size relative to the number of labels: 165 examples across 4 labels is on the low end for a genuinely stable measurement, and the notebook's own `stability_note()` function confirmed this directly ("Your dataset is too small or too lopsided for a stable measure. That IS a diagnosis.").
 
 The one criterion that did hold (balance) is also the one that doesn't depend on the model or the random split at all — it's a fact about the raw label counts, which is why it's stable while everything downstream of training is not.
+
 ## Agreement Report
 
-<!-- Your rate against the staff set, and every disagreement adjudicated.
+I labeled the 30 staff posts under staff's taxonomy (`analysis`,
+`hot_take`, `reaction`), saved my labels, and only then opened staff's
+file and compared them with `agreement.py`.
 
-     Remember you labelled these 30 under the STAFF taxonomy in
-     data/staff_taxonomy.md, not your own — so every argument below is made
-     from those definitions and those decision rules. -->
+**Agreement rate:** 30 / 30 = 100%
 
-**Agreement rate:** ___ / 30 = ___%
+**First run:** The first run reported 29/30 (97%). The one flagged
+"disagreement" was a typo in my file, not a labeling difference: I had
+typed `reactioni` instead of `reaction` on the last row ("Signed up.
+Card's charged, no going back..."). Staff's label was `reaction`, which
+is what I intended. I fixed the typo and re-ran, and the committed
+`agreement_results.json` reflects the corrected file. No label's meaning
+was changed.
 
-<!-- Nobody grades this number. A 60% who argues every disagreement from the
-     stated rules beats a 95% who wrote "staff was right" nine times. Several
-     of the 30 were chosen because they're genuinely ambiguous — you should be
-     winning some of these. -->
+**Disagreements:** None remain, so there is nothing to sort into piles
+(a), (b) or (c).
 
-**Disagreements**
-
-<!-- Three lines each: the post, both labels, and who you think is right and
-     why — grounded in the staff definitions you were both applying.
-
-     Then sort each into one of three piles:
-       (a) the rule covered it and I applied it loosely → a consistency problem
-       (b) the rule genuinely doesn't say               → a gap in the definitions
-       (c) the rule is ambiguous here and my reading is defensible → argue it.
-           This is a legitimate win.
-
-     Pile (a) is the one that matters most for your diagnosis: if you applied a
-     written rule two different ways on 30 posts, that is direct evidence about
-     what you did across your own 200. -->
-
-**1.**
-> *The post:*
->
-> *Staff said / I said:*
->
-> *My call, and why:*
->
-> *Which pile:*
-
-**2.**
-> *The post:*
->
-> *Staff said / I said:*
->
-> *My call, and why:*
->
-> *Which pile:*
-
-**What the pattern in my disagreements tells me:**
-
-
+**What the pattern in my disagreements tells me:** With zero real
+disagreements I can't claim any gap or ambiguity in staff's rules. This
+shows I can apply a written rule consistently, but it was scored under
+staff's three labels, not my four, so it does not directly test my own
+`question` vs. `advice_analysis` boundary. [ADD 1-2 SENTENCES: name a post
+or two that made you hesitate and which staff rule settled it.]
 
 ---
-
 ## The Improvement
 
-**What I changed:**
+**What I changed:** I increased the number of training epochs from 3 to 5. Nothing else changed: same labels, taxonomy, criteria, dataset (165 rows), learning rate, batch size and seeds (42, 7, 2024). Because the dataset and seeds are the same, the test splits are identical to the "before" run, so the two logs are scored on the same posts.
 
-**Which diagnosis pointed at it:**
+**Which diagnosis pointed at it:** Honestly, my main diagnosis pointed at dataset size, not training. I did not have time to label 30 more `advice_analysis` posts, so I picked the one change I could finish and measure. There was a small hint of under-training: in the seed 42 run the eval loss was still falling at epoch 5 (1.37 at epoch 1 down to 1.30), and it never got far below chance for four classes (about 1.39).
 
 ### Run Log — After
 
 | Criterion | Target | Seed 42 | Seed 7 | Seed 2024 | Verdict |
 |---|---|---|---|---|---|
-| 1.  |  |  |  |  |  |
-| 2.  |  |  |  |  |  |
-| 3.  |  |  |  |  |  |
-| 4.  |  |  |  |  |  |
-| 5.  |  |  |  |  |  |
+| 1. Overall accuracy | ≥ 60% | 0.520 | 0.600 | 0.480 | MISSED (seeds 42 and 2024 below target) |
+| 2. F1 per label | ≥ 0.40 on all 4 | question: 0.250, progress_update: 0.632, vent: 0.625, advice_analysis: 0.286 | question: 0.667, progress_update: 0.600, vent: 0.833, advice_analysis: 0.000 | question: 0.500, progress_update: 0.667, vent: 0.500, advice_analysis: 0.000 | MISSED (`advice_analysis` below 0.40 on all 3 seeds, `question` also below on seed 42) |
+| 3. Confidence gap | ≥ 15 points | 50.0 | 50.0 | 62.5 | MET (all 3 seeds) |
+| 4. Balance | ≥ 20% per label | 22-26% | 22-26% | 22-26% | MET (property of the dataset, unchanged) |
+| 5. Agreement with staff labels | ≥ 80% | 100% (30/30) | 100% (30/30) | 100% (30/30) | MET (scored under staff's taxonomy, unchanged) |
 
-**Did it help, and how do I know:**
-
-<!-- If it didn't, say so. Relabelling that didn't help is a genuinely
-     interesting result and earns full credit. -->
-
-
-
+**Did it help, and how do I know:** Yes, partly. Accuracy rose on every seed, from 0.440 / 0.240 / 0.440 to 0.520 / 0.600 / 0.480 (mean 0.373 to 0.533), and macro F1 rose on every seed too. `question` improved the most (F1 from 0.000 / 0.000 / 0.444 to 0.250 / 0.667 / 0.500). Criterion 3 flipped from MISSED to MET: the confidence gap on seed 2024 went from 12.5 to 62.5 points. Criteria 1 and 2 are still MISSED. `advice_analysis` did not change at all (F1 0.286 / 0.000 / 0.000 before and after), which fits my diagnosis that it is a thin-data problem that more epochs cannot fix. Caveats: each test set is only 25 posts, so one post is 4 points of accuracy; accuracy still moved 12 points across seeds (0.480 to 0.600), so the measurement is still not stable; and the model's average confidence was about 0.30 whether it was right or wrong (near chance for four labels), so the criterion 3 pass rests on comparing the top and bottom thirds of 8 posts each and is fragile.
 ---
 
 ## What's Still Broken
