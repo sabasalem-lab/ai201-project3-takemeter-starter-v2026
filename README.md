@@ -211,28 +211,24 @@ dataset (marked `ai-assisted`).
      ═══════════════════════════════════════════════════════════════════ -->
 
 ---
-
 ## Baseline vs. Trained
 
+The baseline is `facebook/bart-large-mnli` (zero-shot), given my four label definitions from `label_definitions.txt`, scored on the same 25 held-out posts in `test_split.csv` (seed 42). The Trained column is my first-run model (3 epochs, seed 42).
 
 | Measure | Baseline | Trained | Difference |
 |---|---|---|---|
-| Overall accuracy | 0.400 | 0.440 | +0.040 |
-| Macro F1 | 0.293 | 0.351 | +0.058 |
-| F1 — `advice_analysis` | 0.000 | 0.286 | +0.286 |
-| F1 — `progress_update` | 0.727 | 0.545 | -0.182 |
-| F1 — `question` | 0.444 | 0.000 | -0.444 |
-| F1 — `vent` | 0.000 | 0.571 | +0.571 |
+| Overall accuracy | 0.280 | 0.440 | +0.160 |
+| Macro F1 | 0.220 | 0.351 | +0.131 |
+| F1 — `advice_analysis` | 0.370 | 0.286 | -0.085 |
+| F1 — `progress_update` | 0.000 | 0.545 | +0.545 |
+| F1 — `question` | 0.222 | 0.000 | -0.222 |
+| F1 — `vent` | 0.286 | 0.571 | +0.286 |
 
+**Definitions vs. bare label names:** I ran the baseline twice. With bare label names only (saved as `baseline_results_bare_names.json`) it scored 0.400 accuracy and 0.293 macro F1. With my four definitions it scored 0.280 and 0.220. So on this test set my definitions made the baseline worse by 0.120 accuracy. I report the definitions run as my baseline, since that is what the assignment asks for.
 
-**What I predicted before I looked:**
+**My prediction:** I expected my trained model to beat the baseline overall, because it learned from my own labeled examples. *Note: I wrote this after seeing my trained model's results, not before the baseline run.*
 
-I expect my trained model to perform somewhat better than the baseline in overall accuracy because it has been trained on actual examples from my specific four-label classification task. However, I am not highly confident about this prediction. My trained model achieved only 44% accuracy, and completely failed to identify the `question` class (F1 = 0.000). With only 165 examples, the training data may not have been sufficient to learn reliable patterns across all four categories. Therefore, I think the trained model may outperform the baseline, but I also consider it possible that the baseline will achieve comparable or better results.
-
-**What the gap actually means:**
-
-My prediction was partially right, but in a more interesting way than I expected. Overall accuracy is only slightly higher for the trained model (+0.040), which matches my low-confidence prediction. But the per-label breakdown tells a more specific story than a single accuracy number: the baseline and my trained model fail on completely different labels. The baseline (a general-purpose zero-shot classifier, not trained on my data) scores 0 F1 on both `advice_analysis` and `vent` — it has no exposure to how my specific labels are worded. My trained model fixed both of those (0.286 and 0.571 respectively), which is real evidence that fine-tuning taught it something the baseline couldn't get from label names alone. But my trained model introduced a new blind spot — `question` dropped to 0.000, down from the baseline's 0.444 — likely because `question` had the least distinct boundary in my taxonomy (it overlaps with `advice_analysis` and even `vent` in places, as I noted in my hardest-boundary writeup). Fine-tuning didn't uniformly improve the model; it reshaped which mistakes it makes.
-
+**What the gap actually means:** The trained model beats the baseline by 0.160 accuracy and 0.131 macro F1, so fine-tuning added something, but each model fails in its own way. The baseline predicted `advice_analysis` for 21 of 25 posts and never predicted `progress_update`, so its F1 on that label is 0.000. The trained model leaned the other way, toward `progress_update`. The trained model is clearly better on `progress_update` (0.545 vs. 0.000) and `vent` (0.571 vs. 0.286), but worse on `question` (0.000 vs. 0.222) and `advice_analysis` (0.286 vs. 0.370). With only 25 test posts, and 6 or 7 per label, each of these differences is a handful of posts, so I treat them as suggestive, not conclusive.
 ---
 
 
