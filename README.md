@@ -205,6 +205,8 @@ with no AI involvement (marked `cold` in the note column). For the remaining
 read and corrected every single suggestion myself before adding it to the
 dataset (marked `ai-assisted`).
 
+**Moment 3 (Unit 6):** I used Claude to check my README and terminal output against the assignment. It caught that my `label_definitions.txt` was still the starter template, that my confusion matrix was blank, and that my run-log tables had missing cells, and it walked me through reloading the notebook and running the improvement. I made the final calls on all verdicts and diagnoses myself.
+
 <!-- ═══════════════════════ UNIT 6 — THE TEST ═══════════════════════
 
      Don't fill these in during unit 5.
@@ -224,23 +226,23 @@ The baseline is `facebook/bart-large-mnli` (zero-shot), given my four label defi
 | F1 — `question` | 0.222 | 0.000 | -0.222 |
 | F1 — `vent` | 0.286 | 0.571 | +0.286 |
 
-**Definitions vs. bare label names:** I ran the baseline twice. With bare label names only (saved as `baseline_results_bare_names.json`) it scored 0.400 accuracy and 0.293 macro F1. With my four definitions it scored 0.280 and 0.220. So on this test set my definitions made the baseline worse by 0.120 accuracy. I report the definitions run as my baseline, since that is what the assignment asks for.
+**First baseline run vs. this one:** I ran the baseline twice. My first run (saved as `baseline_results_bare_names.json`, a misleading filename) was made while `label_definitions.txt` still held the starter's placeholder lines, not my four definitions, so it did not test my definitions properly. It scored 0.400 accuracy and 0.293 macro F1. The run in the table above used my four real definitions and scored 0.280 accuracy and 0.220 macro F1. I did not run a true bare-label-names baseline, so I can't say what my definitions were worth, and I report the run with my definitions as my baseline.
 
 **My prediction:** I expected my trained model to beat the baseline overall, because it learned from my own labeled examples. *Note: I wrote this after seeing my trained model's results, not before the baseline run.*
 
 **What the gap actually means:** The trained model beats the baseline by 0.160 accuracy and 0.131 macro F1, so fine-tuning added something, but each model fails in its own way. The baseline predicted `advice_analysis` for 21 of 25 posts and never predicted `progress_update`, so its F1 on that label is 0.000. The trained model leaned the other way, toward `progress_update`. The trained model is clearly better on `progress_update` (0.545 vs. 0.000) and `vent` (0.571 vs. 0.286), but worse on `question` (0.000 vs. 0.222) and `advice_analysis` (0.286 vs. 0.370). With only 25 test posts, and 6 or 7 per label, each of these differences is a handful of posts, so I treat them as suggestive, not conclusive.
----
 
+---
 
 ## Run Log — Before
 
 | Criterion | Target | Seed 42 | Seed 7 | Seed 2024 | Verdict |
 |---|---|---|---|---|---|
-| 1. Overall accuracy ≥ 60% | 60% | 0.440 | 0.240 | 0.440 | MISSED (all 3 seeds below target) |
-| 2. F1 ≥ 0.40 per label | 0.40 | question: 0.000, progress_update: 0.545, vent: 0.571, advice_analysis: 0.286 | question: 0.000, progress_update: 0.387, vent: 0.000, advice_analysis: 0.000 | question: 0.444, progress_update: 0.545, vent: 0.500, advice_analysis: 0.000 | MISSED (no seed clears 0.40 on all 4 labels) |
-| 3. Confidence gap ≥ 15 points | 62.5 pts | 75.0 pts | 12.5 pts | MISSED |
-| 4. Balance ≥ 20% per label | 20% | 22-26% (unchanged by training) | 22-26% | 22-26% | MET (all 3 seeds — this is a property of the dataset itself, not the training run) |
-| 5. Agreement ≥ 80% with staff labels | 100% (30/30) | same | same | MET |  scored under staff’s taxonomy, not my four labels|
+| 1. Overall accuracy | ≥ 60% | 0.440 | 0.240 | 0.440 | MISSED (all 3 seeds below target) |
+| 2. F1 per label | ≥ 0.40 on all 4 | question: 0.000, progress_update: 0.545, vent: 0.571, advice_analysis: 0.286 | question: 0.000, progress_update: 0.387, vent: 0.000, advice_analysis: 0.000 | question: 0.444, progress_update: 0.545, vent: 0.500, advice_analysis: 0.000 | MISSED (no seed clears 0.40 on all 4 labels) |
+| 3. Confidence gap | ≥ 15 points | 62.5 | 75.0 | 12.5 | MISSED (seed 2024 below target) |
+| 4. Balance | ≥ 20% per label | 22-26% | 22-26% | 22-26% | MET (property of the dataset, not the training run) |
+| 5. Agreement with staff labels | ≥ 80% | 100% (30/30) | 100% (30/30) | 100% (30/30) | MET (scored under staff's taxonomy, not my four labels; doesn't vary by seed) |
 
 ### The spread table
 
@@ -255,7 +257,6 @@ The baseline is `facebook/bart-large-mnli` (zero-shot), given my four label defi
 
 **Stability note (from the notebook):** "Accuracy moved 0.200 across seeds — more than 10 points. Your dataset is too small or too lopsided for a stable measure." This is a genuine diagnosis, not a coding error — with only 165 labeled examples split 4 ways, test splits of 6-7 examples per label are small enough that one seed (seed 7) landed on an unusually hard or atypical split, cratering every label's F1 to near-zero except `progress_update`.
 
-### Confusion matrix
 
 ### Confusion matrix
 
@@ -281,7 +282,7 @@ Seed 42 (25 test posts). Rows are true labels, columns are the model's guesses.
 | 2 | Per-label F1 | ≥ 0.40 for all 4 labels, all 3 seeds | MISSED | No single seed cleared 0.40 on all four labels. Seed 7 scored 0.000 on three of four labels. Seed 42 and 2024 each had at least one label below 0.40. |
 | 3 | Confidence gap | ≥ 15 points, all 3 seeds | MISSED | Gaps were 62.5, 75.0, and 12.5 points. Seed 2024 falls short of the 15-point target, so the criterion doesn't hold across all three seeds even though two of three seeds cleared it comfortably. |
 | 4 | Balance | ≥ 20% per label | MET | Each label sits between 22% and 26% of the 165-example dataset. This is a property of the dataset itself and doesn't change across training seeds. |
-| 5 | Consistency (agreement with staff labels) | ≥ 80% | Not yet measured | Requires labeling the staff's 30-post set under their taxonomy — done separately from the training run. |
+| 5 | Consistency (agreement with staff labels) | ≥ 80% | MET | 30/30 = 100% against staff labels, above the 80% target. Caveat: scored under staff's three labels, so this shows I apply a written rule consistently but doesn't directly test my own question/advice_analysis boundary. |
 
 **Diagnoses**
 
@@ -318,8 +319,7 @@ was changed.
 disagreements I can't claim any gap or ambiguity in staff's rules. This
 shows I can apply a written rule consistently, but it was scored under
 staff's three labels, not my four, so it does not directly test my own
-`question` vs. `advice_analysis` boundary. [ADD 1-2 SENTENCES: name a post
-or two that made you hesitate and which staff rule settled it.]
+`question` vs. `advice_analysis` boundary. No single post made me hesitate enough to flag. I'm not claiming the staff set was easy or that my rule is perfect, only that with zero disagreements I have no evidence of a gap in staff's definitions or of inconsistent application.
 
 ---
 ## The Improvement
@@ -339,9 +339,8 @@ or two that made you hesitate and which staff rule settled it.]
 | 5. Agreement with staff labels | ≥ 80% | 100% (30/30) | 100% (30/30) | 100% (30/30) | MET (scored under staff's taxonomy, unchanged) |
 
 **Did it help, and how do I know:** Yes, partly. Accuracy rose on every seed, from 0.440 / 0.240 / 0.440 to 0.520 / 0.600 / 0.480 (mean 0.373 to 0.533), and macro F1 rose on every seed too. `question` improved the most (F1 from 0.000 / 0.000 / 0.444 to 0.250 / 0.667 / 0.500). Criterion 3 flipped from MISSED to MET: the confidence gap on seed 2024 went from 12.5 to 62.5 points. Criteria 1 and 2 are still MISSED. `advice_analysis` did not change at all (F1 0.286 / 0.000 / 0.000 before and after), which fits my diagnosis that it is a thin-data problem that more epochs cannot fix. Caveats: each test set is only 25 posts, so one post is 4 points of accuracy; accuracy still moved 12 points across seeds (0.480 to 0.600), so the measurement is still not stable; and the model's average confidence was about 0.30 whether it was right or wrong (near chance for four labels), so the criterion 3 pass rests on comparing the top and bottom thirds of 8 posts each and is fragile.
----
 
-## What's Still Broken
+---
 
 ## What's Still Broken
 
