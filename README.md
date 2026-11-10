@@ -295,6 +295,10 @@ This isn't a bug in the training code or the prompt — the model trained normal
 
 The one criterion that did hold (balance) is also the one that doesn't depend on the model or the random split at all — it's a fact about the raw label counts, which is why it's stable while everything downstream of training is not.
 
+**`question`:** F1 was 0.000 / 0.000 / 0.444 across seeds 42 / 7 / 2024 (before). In the seed 42 matrix, 5 of 6 true `question` posts were called `progress_update` and none went the other way, so the model defaulted to `progress_update` instead of learning the question boundary. The cause is most likely a hard label pair plus tiny test sets (6 posts per label): my own hardest-boundary writeup says `question` overlaps with `advice_analysis` and `vent`. My 100% agreement on the staff set gives no sign that I applied rules inconsistently, so I don't think this is labeling drift. That evidence is indirect, because it was scored under staff's three labels, not my four. After 5 epochs `question` improved (0.250 / 0.667 / 0.500), which suggests some of the miss was under-training.
+
+**`advice_analysis`:** F1 was 0.286 / 0.000 / 0.000 before and exactly the same after. It is my thinnest label (37 of 165 rows, 22%). In the seed 42 matrix only 1 of 6 true `advice_analysis` posts was correct, and the other 5 were spread across `question` (1), `progress_update` (2) and `vent` (2), so there is no single boundary it was confused with. Because more epochs changed nothing, the cause is too few examples for this label, combined with its definition being broad (explaining, evaluating or recommending). I'd need more examples to confirm that, which I did not have time to add.
+
 ## Agreement Report
 
 I labeled the 30 staff posts under staff's taxonomy (`analysis`,
@@ -343,14 +347,15 @@ or two that made you hesitate and which staff rule settled it.]
 
 ## What's Still Broken
 
-<!-- For each criterion still missed: what you'd do, and why you stopped. -->
+## What's Still Broken
 
+**Criterion 1 (accuracy ≥ 60%):** Still missed after the improvement. Seeds 42 and 2024 reached 0.520 and 0.480, and only seed 7 reached 0.600. With 165 examples and 25 test posts, one post moves accuracy by 4 points. I would add 30+ examples per label, starting with `advice_analysis`, and use a larger test set. I stopped because I ran out of time.
 
+**Criterion 2 (F1 ≥ 0.40 per label):** Still missed. `advice_analysis` has F1 0.000 on two seeds and 0.286 on the third, and `question` is below 0.40 on seed 42. I would add examples for `advice_analysis` first, since more epochs did not help it.
 
-**The gap between what I meant my labels to capture and what the model
-learned:**
-<!-- Two sentences. Your confusion matrix is the evidence. -->
+**Criterion 3 (confidence gap ≥ 15 points):** Missed before the improvement, met after (50.0 / 50.0 / 62.5). I don't trust this result much: the model's average confidence was about 0.30 whether it was right or wrong, and the gap compares two groups of only 8 posts.
 
+**The gap between what I meant my labels to capture and what the model learned:** I meant `question` to capture posts whose purpose is to get an answer, but in the seed 42 matrix 5 of 6 true `question` posts were called `progress_update`, so the model did not learn purpose. It also spread `advice_analysis` posts across the other three labels, so the "explain or recommend" idea was never learned from 37 examples.
 
 
 <!-- ═════════════════════════════════════════════════════════════════════
